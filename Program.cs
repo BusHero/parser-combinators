@@ -1,7 +1,9 @@
-﻿Console.WriteLine(ParseChar('A')("Amdaris"));
-Console.WriteLine(ParseChar('A')("Spam"));
-Console.WriteLine(ParseChar('S')("Amdaris"));
-Console.WriteLine(ParseChar('S')("Spam"));
+﻿var parseA = ParseChar('A');
+var parseS = ParseChar('S');
+Console.WriteLine(parseA("Amdaris"));
+Console.WriteLine(parseA("Spam"));
+Console.WriteLine(parseS("Amdaris"));
+Console.WriteLine(parseS("Spam"));
 
 
 
