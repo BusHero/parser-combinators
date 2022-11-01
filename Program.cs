@@ -7,7 +7,7 @@ Console.WriteLine(parseS("Spam"));
 
 
 
-Func<string, Result> ParseChar(char ch) => input =>
+Parser ParseChar(char ch) => input =>
 {
 	if (string.IsNullOrEmpty(input))
 		return new Failure("input is null or empty");
@@ -15,6 +15,8 @@ Func<string, Result> ParseChar(char ch) => input =>
 		return new Failure($"The first letter is '{input[0]}', instead of '{ch}'");
 	return new Success(ch, input[1..]);
 };
+
+delegate Result Parser(string input);
 
 record Result;
 record Success(char result, string remaining) : Result;
