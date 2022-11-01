@@ -1,10 +1,17 @@
 ﻿var parseA = ParseChar('A');
 var parseS = ParseChar('S');
-Console.WriteLine(parseA("Amdaris"));
-Console.WriteLine(parseA("Spam"));
-Console.WriteLine(parseS("Amdaris"));
-Console.WriteLine(parseS("Spam"));
+var parseAandS= AndThen(parseA, parseS);
 
+Console.WriteLine(parseAandS("ASD"));
+Console.WriteLine(parseAandS("Amdaris"));
+
+Parser AndThen(Parser p1, Parser p2) => input =>
+{
+	var r = p1(input);
+	if (r is Success s)
+		return p2(s.remaining);
+	return r;
+};
 
 
 Parser ParseChar(char ch) => input =>
