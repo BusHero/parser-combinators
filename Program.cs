@@ -6,12 +6,15 @@ Console.WriteLine(ParseChar('A', "Spam"));
 Console.WriteLine(ParseChar('S', "Amdaris"));
 Console.WriteLine(ParseChar('S', "Spam"));
 
-
-(bool, string) ParseChar(char ch, string input)
+Result ParseChar(char ch, string input)
 {
 	if (string.IsNullOrEmpty(input))
-		return (false, input);
+		return new Failure("input is null or empty");
 	if (input[0] != ch)
-		return (false, input);
-	return (true, input[1..]);
+		return new Failure($"The first letter is '{input[0]}', instead of '{ch}'");
+	return new Success(ch, input[1..]);
 };
+
+record Result;
+record Success(char result, string remaining) : Result;
+record Failure(string Message = "") : Result;
