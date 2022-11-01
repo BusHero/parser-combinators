@@ -6,6 +6,15 @@ Console.WriteLine(ParseChar('A', "Spam"));
 Console.WriteLine(ParseChar('S', "Amdaris"));
 Console.WriteLine(ParseChar('S', "Spam"));
 
+
+// int -> int -> int
+var f1 = (int p1, int p2) => p1 * p2;
+var f2 = (int p1) => (int p2) => p1 * p2;
+Console.WriteLine(f1(6, 7));
+Console.WriteLine(f2(6)(7));
+
+
+
 Result ParseChar(char ch, string input)
 {
 	if (string.IsNullOrEmpty(input))
