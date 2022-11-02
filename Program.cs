@@ -12,35 +12,50 @@ Console.WriteLine(parseAandSorE("Amdaris"));
 Console.WriteLine(parseAandSorE("Spam"));
 
 
-Parser OrElse(Parser p1, Parser p2) => input =>
+Parser<T> OrElse<T>(Parser<T> p1, Parser<T> p2) => input =>
 {
 	var r = p1(input);
-	if (r is Success)
+	if (r is Success<T>)
 		return r;
 	return p2(input);
 };
 
 
-Parser AndThen(Parser p1, Parser p2) => input =>
+Parser<(T, U)> AndThen<T, U>(Parser<T> p1, Parser<U> p2) => input =>
 {
 	var r = p1(input);
-	if (r is Success s)
-		return p2(s.remaining);
-	return r;
+	if (r is Success<T> s)
+	{
+		var r2 = p2(s.remaining);
+		if (r2 is Success<U> s2)
+		{
+			return new Success<(T, U)>((s.result, s2.result), s2.remaining);
+		}
+		else if (r2 is Failure<T> f2)
+		{
+			return new Failure<(T, U)>(f2.Message);
+		}
+		throw new Exception("???");
+	}
+	else if (r is Failure<T> f)
+	{
+		return new Failure<(T, U)>(f.Message);
+	}
+	throw new Exception("???");
 };
 
 
-Parser ParseChar(char ch) => input =>
+Parser<char> ParseChar(char ch) => input =>
 {
 	if (string.IsNullOrEmpty(input))
-		return new Failure("input is null or empty");
+		return new Failure<char>("input is null or empty");
 	if (input[0] != ch)
-		return new Failure($"The first letter is '{input[0]}', instead of '{ch}'");
-	return new Success(ch, input[1..]);
+		return new Failure<char>($"The first letter is '{input[0]}', instead of '{ch}'");
+	return new Success<char>(ch, input[1..]);
 };
 
-delegate Result Parser(string input);
+delegate Result<T> Parser<T>(string input);
 
-record Result;
-record Success(char result, string remaining) : Result;
-record Failure(string Message = "") : Result;
+record Result<T>;
+record Success<T>(T result, string remaining) : Result<T>;
+record Failure<T>(string Message = "") : Result<T>;
