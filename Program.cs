@@ -10,7 +10,7 @@ Console.WriteLine(parseAandSandE("ASE"));
 
 var parseAandSandEmapped = Map(
 	parseAandSandE,
-	tuple => (tuple.Item1, tuple.Item2.Item1, tuple.Item2.Item2));
+	tuple => $"{tuple.Item1}{tuple.Item2.Item1}{tuple.Item2.Item2}");
 Console.WriteLine(parseAandSandEmapped("ASE"));
 
 
