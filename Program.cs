@@ -1,9 +1,22 @@
 ﻿var parseA = ParseChar('A');
 var parseS = ParseChar('S');
-var parseAandS= AndThen(parseA, parseS);
+var parseAandS = AndThen(parseA, parseS);
+var parseAorS = OrElse(parseA, parseS);
 
-Console.WriteLine(parseAandS("ASD"));
-Console.WriteLine(parseAandS("Amdaris"));
+Console.WriteLine(parseAorS("Amdaris"));
+Console.WriteLine(parseAorS("Spam"));
+Console.WriteLine(parseAorS("Eggs"));
+
+
+
+Parser OrElse(Parser p1, Parser p2) => input =>
+{
+	var r = p1(input);
+	if (r is Success)
+		return r;
+	return p2(input);
+};
+
 
 Parser AndThen(Parser p1, Parser p2) => input =>
 {
