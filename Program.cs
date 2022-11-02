@@ -1,12 +1,15 @@
 ﻿var parseA = ParseChar('A');
 var parseS = ParseChar('S');
-var parseAandS = AndThen(parseA, parseS);
-var parseAorS = OrElse(parseA, parseS);
+var parseE = ParseChar('E');
 
-Console.WriteLine(parseAorS("Amdaris"));
-Console.WriteLine(parseAorS("Spam"));
-Console.WriteLine(parseAorS("Eggs"));
+var parseSorE = OrElse(parseS, parseE);
 
+var parseAandSorE = AndThen(parseA, parseSorE);
+
+Console.WriteLine(parseAandSorE("ASD"));
+Console.WriteLine(parseAandSorE("AED"));
+Console.WriteLine(parseAandSorE("Amdaris"));
+Console.WriteLine(parseAandSorE("Spam"));
 
 
 Parser OrElse(Parser p1, Parser p2) => input =>
