@@ -5,12 +5,28 @@ var parseE = ParseChar('E');
 var parseSorE = OrElse(parseS, parseE);
 
 var parseAandSorE = AndThen(parseA, parseSorE);
+var parseAandSandE = AndThen(parseA, AndThen(parseS, parseE));
+Console.WriteLine(parseAandSandE("ASE"));
 
-Console.WriteLine(parseAandSorE("ASD"));
-Console.WriteLine(parseAandSorE("AED"));
-Console.WriteLine(parseAandSorE("Amdaris"));
-Console.WriteLine(parseAandSorE("Spam"));
+var parseAandSandEmapped = Map(
+	parseAandSandE,
+	tuple => (tuple.Item1, tuple.Item2.Item1, tuple.Item2.Item2));
+Console.WriteLine(parseAandSandEmapped("ASE"));
 
+
+Parser<U> Map<T, U>(Parser<T> parser, Func<T, U> mapper) => input =>
+{
+	var r = parser(input);
+	if (r is Success<T> s)
+	{
+		return new Success<U>(mapper(s.result), s.remaining);
+	}
+	else if (r is Failure<T> f)
+	{
+		return new Failure<U>(f.Message);
+	}
+	throw new Exception("???");
+};
 
 Parser<T> OrElse<T>(Parser<T> p1, Parser<T> p2) => input =>
 {
