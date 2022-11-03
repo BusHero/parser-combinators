@@ -1,17 +1,29 @@
 ﻿var parseA = ParseChar('A');
 var parseS = ParseChar('S');
 var parseE = ParseChar('E');
+var parseAandS = AndThen(parseA, parseS);
+var manyAandS = Map(Many(parseAandS), r => '[' + string.Join(",", r) + ']');
+var manyA = Map(Many(parseA), r => '[' + string.Join(",", r) + ']');
 
-var parseSorE = OrElse(parseS, parseE);
+Console.WriteLine(manyA("ABC"));
+Console.WriteLine(manyA("AABC"));
+Console.WriteLine(manyA("AAABC"));
+Console.WriteLine(manyAandS("ASBC"));
+Console.WriteLine(manyAandS("ASASBC"));
+Console.WriteLine(manyAandS("ASASASBC"));
 
-var parseAandSorE = AndThen(parseA, parseSorE);
-var parseAandSandE = AndThen(parseA, AndThen(parseS, parseE));
-Console.WriteLine(parseAandSandE("ASE"));
 
-var parseAandSandEmapped = Map(
-	parseAandSandE,
-	tuple => $"{tuple.Item1}{tuple.Item2.Item1}{tuple.Item2.Item2}");
-Console.WriteLine(parseAandSandEmapped("ASE"));
+Parser<List<T>> Many<T>(Parser<T> parser) => input =>
+{
+	var list = new List<T>();
+	var remaining = input;
+	while (parser(remaining) is Success<T> s)
+	{
+		list.Add(s.result);
+		remaining = s.remaining;
+	}
+	return new Success<List<T>>(list, remaining);
+};
 
 
 Parser<U> Map<T, U>(Parser<T> parser, Func<T, U> mapper) => input =>
