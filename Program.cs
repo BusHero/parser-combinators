@@ -4,16 +4,29 @@ var parseE = ParseChar('E');
 var parseAandS = AndThen(parseA, parseS);
 var manyAandS = Map(Many(parseAandS), r => '[' + string.Join(",", r) + ']');
 var manyA = Map(Many(parseA), r => '[' + string.Join(",", r) + ']');
+var many1A = Map(Many1(parseA), r => '[' + string.Join(",", r) + ']');
 
-Console.WriteLine(manyA("ABC"));
-Console.WriteLine(manyA("AABC"));
-Console.WriteLine(manyA("AAABC"));
-Console.WriteLine(manyAandS("ASBC"));
-Console.WriteLine(manyAandS("ASASBC"));
-Console.WriteLine(manyAandS("ASASASBC"));
+Console.WriteLine(many1A("ABC"));
+Console.WriteLine(many1A("BCD"));
 
-Console.WriteLine(manyA("BCA"));
 
+
+Parser<List<T>> Many1<T>(Parser<T> parser) => input =>
+{
+	var result = parser(input);
+	if (result is Success<T> s)
+	{
+		var list = new List<T> { s.result };
+		var remaining = s.remaining;
+		if (Many(parser)(input) is Success<List<T>> s2)
+		{
+			list.AddRange(s2.result);
+			remaining = s2.remaining;
+		}
+		return new Success<List<T>>(list, remaining);
+	}
+	return new Failure<List<T>>("Many1 failed");
+};
 
 Parser<List<T>> Many<T>(Parser<T> parser) => input =>
 {
