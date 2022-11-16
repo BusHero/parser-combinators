@@ -1,13 +1,21 @@
 ﻿var parseA = ParseChar('A');
 var parseS = ParseChar('S');
 var parseE = ParseChar('E');
-var parserAorSorE = AnyOf(parseA, parseS, parseE);
+var parserAorSorE = AnyOfChar('A', 'S', 'E');
 
 Console.WriteLine(parserAorSorE("A"));
 Console.WriteLine(parserAorSorE("S"));
 Console.WriteLine(parserAorSorE("E"));
 Console.WriteLine(parserAorSorE("D"));
 
+
+Parser<char> AnyOfChar(params char[] characters)
+{
+	var characterParsers = characters
+		.Select(ch => ParseChar(ch))
+		.ToArray();
+	return AnyOf(characterParsers);
+}
 
 Parser<T> AnyOf<T>(params Parser<T>[] parsers)
 {
