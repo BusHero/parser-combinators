@@ -1,15 +1,18 @@
 ﻿var parseA = ParseChar('A');
 var parseS = ParseChar('S');
 var parseE = ParseChar('E');
-var parseAandS = AndThen(parseA, parseS);
-var manyAandS = Map(Many(parseAandS), r => '[' + string.Join(",", r) + ']');
-var manyA = Map(Many(parseA), r => '[' + string.Join(",", r) + ']');
-var many1A = Map(Many1(parseA), r => '[' + string.Join(",", r) + ']');
+var parserAorSorE = AnyOf(parseA, parseS, parseE);
 
-Console.WriteLine(many1A("ABC"));
-Console.WriteLine(many1A("BCD"));
+Console.WriteLine(parserAorSorE("A"));
+Console.WriteLine(parserAorSorE("S"));
+Console.WriteLine(parserAorSorE("E"));
+Console.WriteLine(parserAorSorE("D"));
 
 
+Parser<T> AnyOf<T>(params Parser<T>[] parsers)
+{
+	return parsers.Aggregate((first, second) => OrElse(first, second));
+}
 
 Parser<List<T>> Many1<T>(Parser<T> parser) => input =>
 {
