@@ -12,6 +12,8 @@ Console.WriteLine(manyAandS("ASBC"));
 Console.WriteLine(manyAandS("ASASBC"));
 Console.WriteLine(manyAandS("ASASASBC"));
 
+Console.WriteLine(manyA("BCA"));
+
 
 Parser<List<T>> Many<T>(Parser<T> parser) => input =>
 {
