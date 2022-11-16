@@ -1,8 +1,30 @@
-﻿var parse1 = ParseChar('1');
-var optParse1 = ParserOptional(parse1);
+﻿var parseInteger = ParseInt();
 
-Console.WriteLine(optParse1("1"));
-Console.WriteLine(optParse1("0"));
+Console.WriteLine(parseInteger("123"));
+Console.WriteLine(parseInteger("123asd"));
+Console.WriteLine(parseInteger("-123"));
+Console.WriteLine(parseInteger("abc"));
+
+
+Parser<int> ParseInt()
+{
+	var digitParser = AnyOfChar('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+	var manyDigits = Many1(digitParser);
+	var positiveInteger = Map(manyDigits, list => int.Parse(string.Join("", list)));
+
+	var optionalMinus = ParserOptional(ParseChar('-'));
+
+	var optionalMinusAndPositiveInteger = AndThen(optionalMinus, positiveInteger);
+	var integer = Map(optionalMinusAndPositiveInteger, tuple =>
+	{
+		if (tuple.Item1.HasValue)
+		{
+			return -tuple.Item2;
+		}
+		return tuple.Item2;
+	});
+	return integer;
+}
 
 Parser<Optional<T>> ParserOptional<T>(Parser<T> parser) => input =>
 {
@@ -13,15 +35,6 @@ Parser<Optional<T>> ParserOptional<T>(Parser<T> parser) => input =>
 	}
 	return new Success<Optional<T>>(new Optional<T>(), input);
 };
-
-Parser<int> ParseInt()
-{
-	var digitParser = AnyOfChar('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
-	var parser = Many1(digitParser);
-	var mapped = Map(parser, list => int.Parse(string.Join("", list)));
-	return mapped;
-}
-
 
 Parser<char> AnyOfChar(params char[] characters)
 {
@@ -99,7 +112,7 @@ Parser<(T, U)> AndThen<T, U>(Parser<T> p1, Parser<U> p2) => input =>
 		{
 			return new Success<(T, U)>((s.result, s2.result), s2.remaining);
 		}
-		else if (r2 is Failure<T> f2)
+		else if (r2 is Failure<U> f2)
 		{
 			return new Failure<(T, U)>(f2.Message);
 		}
