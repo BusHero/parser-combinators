@@ -1,12 +1,17 @@
-﻿var parseA = ParseChar('A');
-var parseS = ParseChar('S');
-var parseE = ParseChar('E');
-var parserAorSorE = AnyOfChar('A', 'S', 'E');
+﻿var parseInt = ParseInt();
 
-Console.WriteLine(parserAorSorE("A"));
-Console.WriteLine(parserAorSorE("S"));
-Console.WriteLine(parserAorSorE("E"));
-Console.WriteLine(parserAorSorE("D"));
+Console.WriteLine(parseInt("1"));
+Console.WriteLine(parseInt("12"));
+Console.WriteLine(parseInt("123"));
+Console.WriteLine(parseInt("A"));
+
+Parser<int> ParseInt()
+{
+	var digitParser = AnyOfChar('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+	var parser = Many1(digitParser);
+	var mapped = Map(parser, list => int.Parse(string.Join("", list)));
+	return mapped;
+}
 
 
 Parser<char> AnyOfChar(params char[] characters)
@@ -29,7 +34,7 @@ Parser<List<T>> Many1<T>(Parser<T> parser) => input =>
 	{
 		var list = new List<T> { s.result };
 		var remaining = s.remaining;
-		if (Many(parser)(input) is Success<List<T>> s2)
+		if (Many(parser)(s.remaining) is Success<List<T>> s2)
 		{
 			list.AddRange(s2.result);
 			remaining = s2.remaining;
