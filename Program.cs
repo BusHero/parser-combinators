@@ -1,10 +1,15 @@
-﻿var parseInteger = ParseInt();
+﻿var parseSpace = ParseChar(' ');
+var parseA = ParseChar('a');
+var parseInteger = ParseInt();
+var parseToken = Between(parseSpace, parseInteger, parseSpace);
+Console.WriteLine(parseToken(" 123 "));
 
-Console.WriteLine(parseInteger("123"));
-Console.WriteLine(parseInteger("123asd"));
-Console.WriteLine(parseInteger("-123"));
-Console.WriteLine(parseInteger("abc"));
-
+Parser<TU> Between<T, TU, TZ>(Parser<T> right, Parser<TU> parser, Parser<TZ> left)
+{
+	var rightThenParserThenLeft = AndThen(right, AndThen(parser, left));
+	var middle = Map(rightThenParserThenLeft, tuple => tuple.Item2.Item1);
+	return middle;
+};
 
 Parser<int> ParseInt()
 {
