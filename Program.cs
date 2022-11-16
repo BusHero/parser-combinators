@@ -1,9 +1,18 @@
-﻿var parseInt = ParseInt();
+﻿var parse1 = ParseChar('1');
+var optParse1 = ParserOptional(parse1);
 
-Console.WriteLine(parseInt("1"));
-Console.WriteLine(parseInt("12"));
-Console.WriteLine(parseInt("123"));
-Console.WriteLine(parseInt("A"));
+Console.WriteLine(optParse1("1"));
+Console.WriteLine(optParse1("0"));
+
+Parser<Optional<T>> ParserOptional<T>(Parser<T> parser) => input =>
+{
+	var result = parser(input);
+	if (result is Success<T> s)
+	{
+		return new Success<Optional<T>>(new Optional<T>(s.result), s.remaining);
+	}
+	return new Success<Optional<T>>(new Optional<T>(), input);
+};
 
 Parser<int> ParseInt()
 {
@@ -118,3 +127,24 @@ delegate Result<T> Parser<T>(string input);
 record Result<T>;
 record Success<T>(T result, string remaining) : Result<T>;
 record Failure<T>(string Message = "") : Result<T>;
+
+
+struct Optional<T>
+{
+	public T Value { get; }
+	public bool HasValue { get; }
+
+	public Optional()
+	{
+		Value = default;
+		HasValue = false;
+	}
+
+	public Optional(T value)
+	{
+		Value = value;
+		HasValue = true;
+	}
+
+	public override string ToString() => HasValue ? $"Some({Value})" : "None";
+}
