@@ -10,57 +10,39 @@ Console.WriteLine(expression("2/2"));
 Console.WriteLine(expression("2%2"));
 Console.WriteLine(expression("2+2*2"));
 
-
-Parser<int> Expression()
+Parser<int> Expression() => input =>
 {
-	var integerOperatorinteger = AndThen(integer, AndThen(operators, integer));
-	return Map(integerOperatorinteger, tuple =>
+	var operatorAndInteger = AndThen(operators, integer);
+
+	var result = integer(input);
+	if (result is Success<int> success)
 	{
-		return tuple.Item2.Item1 switch
+		var intermediate = success.result;
+		var remaining = success.remaining;
+		while (true)
 		{
-			'+' => tuple.Item1 + tuple.Item2.Item2,
-			'-' => tuple.Item1 - tuple.Item2.Item2,
-			'*' => tuple.Item1 * tuple.Item2.Item2,
-			'/' => tuple.Item1 / tuple.Item2.Item2,
-			'%' => tuple.Item1 % tuple.Item2.Item2,
-			_ => throw new Exception("???")
-		};
-	});
-}
-
-// Parser<int> Expression() => input =>
-// {
-// 	var operatorAndInteger = AndThen(operators, integer);
-
-// 	var result = integer(input);
-// 	if (result is Success<int> success)
-// 	{
-// 		var intermediate = success.result;
-// 		var remaining = success.remaining;
-// 		while (true)
-// 		{
-// 			if (operatorAndInteger(remaining) is Success<(char, int)> success2)
-// 			{
-// 				intermediate = success2.result.Item1 switch
-// 				{
-// 					'+' => intermediate + success2.result.Item2,
-// 					'-' => intermediate - success2.result.Item2,
-// 					'*' => intermediate * success2.result.Item2,
-// 					'/' => intermediate / success2.result.Item2,
-// 					'%' => intermediate % success2.result.Item2,
-// 					_ => throw new Exception("???")
-// 				};
-// 				remaining = success2.remaining;
-// 			}
-// 			else
-// 			{
-// 				break;
-// 			}
-// 		}
-// 		return new Success<int>(intermediate, remaining);
-// 	}
-// 	return new Failure<int>("Expression failed");
-// };
+			if (operatorAndInteger(remaining) is Success<(char, int)> success2)
+			{
+				intermediate = success2.result.Item1 switch
+				{
+					'+' => intermediate + success2.result.Item2,
+					'-' => intermediate - success2.result.Item2,
+					'*' => intermediate * success2.result.Item2,
+					'/' => intermediate / success2.result.Item2,
+					'%' => intermediate % success2.result.Item2,
+					_ => throw new Exception("???")
+				};
+				remaining = success2.remaining;
+			}
+			else
+			{
+				break;
+			}
+		}
+		return new Success<int>(intermediate, remaining);
+	}
+	return new Failure<int>("Expression failed");
+};
 
 Parser<TU> Between<T, TU, TZ>(Parser<T> right, Parser<TU> parser, Parser<TZ> left)
 {
