@@ -1,6 +1,6 @@
 ﻿var integer = ParseInt();
 var parsePlus = ParseChar('+');
-// var operators = AnyOfChar('+', '-', '*', '/', '%');
+var operators = AnyOfChar('+', '-', '*', '/', '%');
 var expression = Expression();
 
 Console.WriteLine(expression("2+2"));
@@ -8,30 +8,25 @@ Console.WriteLine(expression("2-2"));
 Console.WriteLine(expression("2*2"));
 Console.WriteLine(expression("2/2"));
 Console.WriteLine(expression("2%2"));
-// Console.WriteLine(expression("2+2*2"));
+Console.WriteLine(expression("2+2*2"));
+
 
 Parser<int> Expression()
 {
-	var integerPlusInteger = AndThen(integer, AndThen(parsePlus, integer));
-	return Map(integerPlusInteger, tuple => tuple.Item1 + tuple.Item2.Item2);
+	var integerOperatorinteger = AndThen(integer, AndThen(operators, integer));
+	return Map(integerOperatorinteger, tuple =>
+	{
+		return tuple.Item2.Item1 switch
+		{
+			'+' => tuple.Item1 + tuple.Item2.Item2,
+			'-' => tuple.Item1 - tuple.Item2.Item2,
+			'*' => tuple.Item1 * tuple.Item2.Item2,
+			'/' => tuple.Item1 / tuple.Item2.Item2,
+			'%' => tuple.Item1 % tuple.Item2.Item2,
+			_ => throw new Exception("???")
+		};
+	});
 }
-
-// Parser<int> Expression()
-// {
-// 	var integerOperatorinteger = AndThen(integer, AndThen(operators, integer));
-// 	return Map(integerOperatorinteger, tuple =>
-// 	{
-// 		return tuple.Item2.Item1 switch
-// 		{
-// 			'+' => tuple.Item1 + tuple.Item2.Item2,
-// 			'-' => tuple.Item1 - tuple.Item2.Item2,
-// 			'*' => tuple.Item1 * tuple.Item2.Item2,
-// 			'/' => tuple.Item1 / tuple.Item2.Item2,
-// 			'%' => tuple.Item1 % tuple.Item2.Item2,
-// 			_ => throw new Exception("???")
-// 		};
-// 	});
-// }
 
 // Parser<int> Expression() => input =>
 // {
