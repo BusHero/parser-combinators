@@ -5,45 +5,61 @@ var minus = ParseChar('-');
 var multiply = ParseChar('*');
 var divide = ParseChar('/');
 var number = ParseInt();
-var operatorAndFactor = AndThen(OrElse(multiply, divide), number);
-var factor = ParseFactor();
+
+var expressionPlaceholder = new ParserPlaceholder<int>();
+var factor = ParseFactor(expressionPlaceholder.Parser);
+var operatorAndFactor = AndThen(OrElse(multiply, divide), factor);
 var term = ParseTerm();
+var operatorAndTerm = AndThen(OrElse(plus, minus), term);
+var expression = ParseExpression();
+expressionPlaceholder.Initialize(expression);
 
-Console.WriteLine(term("2*2*2"));
+Console.WriteLine(expression("(2+2*2)"));
+Console.WriteLine(expression("2*2"));
 
-
-Parser<int> ParseTerm() => input =>
+Parser<int> ParseExpression()
 {
-	var result = number(input);
-	if (result is Success<int> success)
-	{
-		var intermediate = success.result;
-		var remaining = success.remaining;
-		while (true)
-		{
-			if (operatorAndFactor(remaining) is Success<(char, int)> success2)
+	return Map(
+		AndThen(term, Many(operatorAndTerm)),
+		tuple => tuple.Item2.Aggregate(
+			tuple.Item1,
+			(first, second) =>
 			{
-				intermediate = success2.result.Item1 switch
+				return second.Item1 switch
 				{
-					'*' => intermediate * success2.result.Item2,
-					'/' => intermediate / success2.result.Item2,
+					'+' => first + second.Item2,
+					'-' => first - second.Item2,
 					_ => throw new Exception("???")
 				};
-				remaining = success2.remaining;
-			}
-			else
-			{
-				break;
-			}
-		}
-		return new Success<int>(intermediate, remaining);
-	}
-	return new Failure<int>("Expression failed");
-};
+			})
+	);
+}
 
-Parser<int> ParseFactor()
+Parser<int> ParseTerm()
 {
-	return number;
+	return Map(
+		AndThen(factor, Many(operatorAndFactor)),
+		tuple => tuple.Item2.Aggregate(
+			tuple.Item1,
+			(first, second) =>
+			{
+				return second.Item1 switch
+				{
+					'*' => first + second.Item2,
+					'/' => first - second.Item2,
+					_ => throw new Exception("???")
+				};
+			})
+	);
+}
+
+Parser<int> ParseFactor(Parser<int> expression)
+{
+	var rightParanthesis = ParseChar('(');
+	var leftParanthesis = ParseChar(')');
+	return OrElse(
+		number,
+		Between(rightParanthesis, expression, leftParanthesis));
 }
 
 Parser<ImmutableList<T>> ParseList<T>(params Parser<T>[] parsers)
