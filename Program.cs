@@ -1,10 +1,14 @@
 ﻿using System.Collections.Immutable;
-var parseA = ParseChar('A');
-var parseB = ParseChar('B');
-var parseC = ParseChar('C');
-var parseABC = Map(ParseList(parseA, parseB, parseC), item => string.Join("", item));
-Console.WriteLine(parseABC("ABC"));
 
+var number = ParseInt();
+var factor = ParseFactor();
+
+Console.WriteLine(factor("123"));
+
+Parser<int> ParseFactor()
+{
+	return number;
+}
 
 Parser<ImmutableList<T>> ParseList<T>(params Parser<T>[] parsers)
 {
@@ -180,4 +184,24 @@ struct Optional<T>
 	}
 
 	public override string ToString() => HasValue ? $"Some({Value})" : "None";
+}
+
+class ParserPlaceholder<T>
+{
+	public ParserPlaceholder()
+	{
+		Parser = input =>
+		{
+			if (_parser is null)
+			{
+				throw new InvalidOperationException("Parser is not initialized. Forgot to call Initialize()?");
+			}
+			return _parser(input);
+		};
+	}
+
+	public void Initialize(Parser<T> parser) => this._parser = parser;
+
+	private Parser<T> _parser;
+	public Parser<T> Parser { get; }
 }
