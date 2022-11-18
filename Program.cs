@@ -1,10 +1,10 @@
 ﻿using System.Collections.Immutable;
 
-var plus = ParseChar('+');
-var minus = ParseChar('-');
-var multiply = ParseChar('*');
-var divide = ParseChar('/');
-var number = ParseInt();
+var plus = ParseToken(ParseChar('+'));
+var minus = ParseToken(ParseChar('-'));
+var multiply = ParseToken(ParseChar('*'));
+var divide = ParseToken(ParseChar('/'));
+var number = ParseToken(ParseInt());
 
 var expressionPlaceholder = new ParserPlaceholder<int>();
 var factor = ParseFactor(expressionPlaceholder.Parser);
@@ -14,8 +14,25 @@ var operatorAndTerm = AndThen(OrElse(plus, minus), term);
 var expression = ParseExpression();
 expressionPlaceholder.Initialize(expression);
 
-Console.WriteLine(expression("(2+2*2)"));
-Console.WriteLine(expression("2*2"));
+while (true)
+{
+	var line = Console.ReadLine();
+	var result = expression(line);
+	if (result is Success<int> s)
+	{
+		Console.WriteLine(s.result);
+	}
+	else
+	{
+		Console.WriteLine("Invalid expression");
+	}
+}
+
+Parser<T> ParseToken<T>(Parser<T> parser)
+{
+	var manySpaces = Many(ParseChar(' '));
+	return Between(manySpaces, parser, manySpaces);
+}
 
 Parser<int> ParseExpression()
 {
@@ -45,8 +62,8 @@ Parser<int> ParseTerm()
 			{
 				return second.Item1 switch
 				{
-					'*' => first + second.Item2,
-					'/' => first - second.Item2,
+					'*' => first * second.Item2,
+					'/' => first / second.Item2,
 					_ => throw new Exception("???")
 				};
 			})
