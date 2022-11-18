@@ -1,9 +1,45 @@
 ﻿using System.Collections.Immutable;
 
+var plus = ParseChar('+');
+var minus = ParseChar('-');
+var multiply = ParseChar('*');
+var divide = ParseChar('/');
 var number = ParseInt();
+var operatorAndFactor = AndThen(OrElse(multiply, divide), number);
 var factor = ParseFactor();
+var term = ParseTerm();
 
-Console.WriteLine(factor("123"));
+Console.WriteLine(term("2*2*2"));
+
+
+Parser<int> ParseTerm() => input =>
+{
+	var result = number(input);
+	if (result is Success<int> success)
+	{
+		var intermediate = success.result;
+		var remaining = success.remaining;
+		while (true)
+		{
+			if (operatorAndFactor(remaining) is Success<(char, int)> success2)
+			{
+				intermediate = success2.result.Item1 switch
+				{
+					'*' => intermediate * success2.result.Item2,
+					'/' => intermediate / success2.result.Item2,
+					_ => throw new Exception("???")
+				};
+				remaining = success2.remaining;
+			}
+			else
+			{
+				break;
+			}
+		}
+		return new Success<int>(intermediate, remaining);
+	}
+	return new Failure<int>("Expression failed");
+};
 
 Parser<int> ParseFactor()
 {
