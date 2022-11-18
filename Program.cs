@@ -1,48 +1,5 @@
-﻿var integer = ParseInt();
-var parsePlus = ParseChar('+');
-var operators = AnyOfChar('+', '-', '*', '/', '%');
-var expression = Expression();
-
-Console.WriteLine(expression("2+2"));
-Console.WriteLine(expression("2-2"));
-Console.WriteLine(expression("2*2"));
-Console.WriteLine(expression("2/2"));
-Console.WriteLine(expression("2%2"));
-Console.WriteLine(expression("2+2*2"));
-
-Parser<int> Expression() => input =>
-{
-	var operatorAndInteger = AndThen(operators, integer);
-
-	var result = integer(input);
-	if (result is Success<int> success)
-	{
-		var intermediate = success.result;
-		var remaining = success.remaining;
-		while (true)
-		{
-			if (operatorAndInteger(remaining) is Success<(char, int)> success2)
-			{
-				intermediate = success2.result.Item1 switch
-				{
-					'+' => intermediate + success2.result.Item2,
-					'-' => intermediate - success2.result.Item2,
-					'*' => intermediate * success2.result.Item2,
-					'/' => intermediate / success2.result.Item2,
-					'%' => intermediate % success2.result.Item2,
-					_ => throw new Exception("???")
-				};
-				remaining = success2.remaining;
-			}
-			else
-			{
-				break;
-			}
-		}
-		return new Success<int>(intermediate, remaining);
-	}
-	return new Failure<int>("Expression failed");
-};
+﻿
+Parser<T> Return<T>(T value) => input => new Success<T>(value, input);
 
 Parser<TU> Between<T, TU, TZ>(Parser<T> right, Parser<TU> parser, Parser<TZ> left)
 {
