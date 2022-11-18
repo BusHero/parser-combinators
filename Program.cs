@@ -1,4 +1,22 @@
-﻿
+﻿using System.Collections.Immutable;
+var parseA = ParseChar('A');
+var parseB = ParseChar('B');
+var parseC = ParseChar('C');
+var parseABC = Map(ParseList(parseA, parseB, parseC), item => string.Join("", item));
+Console.WriteLine(parseABC("ABC"));
+
+
+Parser<ImmutableList<T>> ParseList<T>(params Parser<T>[] parsers)
+{
+	var result = Return(ImmutableList.Create<T>());
+	foreach (var parser in parsers)
+	{
+		var foo = AndThen(result, parser);
+		result = Map(foo, tuple => tuple.Item1.Add(tuple.Item2));
+	}
+	return result;
+}
+
 Parser<T> Return<T>(T value) => input => new Success<T>(value, input);
 
 Parser<TU> Between<T, TU, TZ>(Parser<T> right, Parser<TU> parser, Parser<TZ> left)
