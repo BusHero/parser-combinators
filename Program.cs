@@ -1,24 +1,16 @@
 ﻿using System.Collections.Immutable;
-
-var plus = ParseToken(ParseChar('+'));
-var minus = ParseToken(ParseChar('-'));
-var multiply = ParseToken(ParseChar('*'));
-var divide = ParseToken(ParseChar('/'));
 var number = ParseToken(ParseInt());
 
 var expressionPlaceholder = new ParserPlaceholder<int>();
 var factor = ParseFactor(expressionPlaceholder.Parser);
-var operatorAndFactor = AndThen(OrElse(multiply, divide), factor);
 var term = ParseTerm();
-var operatorAndTerm = AndThen(OrElse(plus, minus), term);
 var expression = ParseExpression();
 expressionPlaceholder.Initialize(expression);
 
 while (true)
 {
 	var line = Console.ReadLine();
-	var result = expression(line);
-	if (result is Success<int> s)
+	if (expression(line) is Success<int> s)
 	{
 		Console.WriteLine(s.result);
 	}
@@ -36,6 +28,9 @@ Parser<T> ParseToken<T>(Parser<T> parser)
 
 Parser<int> ParseExpression()
 {
+	var plus = ParseToken(ParseChar('+'));
+	var minus = ParseToken(ParseChar('-'));
+	var operatorAndTerm = AndThen(OrElse(plus, minus), term);
 	return Map(
 		AndThen(term, Many(operatorAndTerm)),
 		tuple => tuple.Item2.Aggregate(
@@ -54,6 +49,9 @@ Parser<int> ParseExpression()
 
 Parser<int> ParseTerm()
 {
+	var multiply = ParseToken(ParseChar('*'));
+	var divide = ParseToken(ParseChar('/'));
+	var operatorAndFactor = AndThen(OrElse(multiply, divide), factor);
 	return Map(
 		AndThen(factor, Many(operatorAndFactor)),
 		tuple => tuple.Item2.Aggregate(
@@ -72,8 +70,8 @@ Parser<int> ParseTerm()
 
 Parser<int> ParseFactor(Parser<int> expression)
 {
-	var rightParanthesis = ParseChar('(');
-	var leftParanthesis = ParseChar(')');
+	var rightParanthesis = ParseToken(ParseChar('('));
+	var leftParanthesis = ParseToken(ParseChar(')'));
 	return OrElse(
 		number,
 		Between(rightParanthesis, expression, leftParanthesis));
